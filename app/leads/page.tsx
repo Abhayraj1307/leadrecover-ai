@@ -1,0 +1,9 @@
+import Link from "next/link";
+import { AppShell } from "@/components/app-shell";
+import { StatusBadge } from "@/components/status-badge";
+import { getDashboardData } from "@/lib/data";
+import { hasSupabase } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+
+export const dynamic = "force-dynamic";
+export default async function LeadsPage() { const data = await getDashboardData(); if (!data) redirect(hasSupabase ? "/login" : "/onboarding"); return <AppShell company={data.business.company_name}><p className="text-sm font-medium text-sky-700">Pipeline</p><h1 className="mt-1 text-3xl font-bold tracking-tight">Leads</h1><div className="panel mt-8 overflow-x-auto"><table className="w-full min-w-[700px] text-left text-sm"><thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500"><tr><th className="px-5 py-3 font-semibold">Caller</th><th className="px-5 py-3 font-semibold">Issue</th><th className="px-5 py-3 font-semibold">Urgency</th><th className="px-5 py-3 font-semibold">Received</th><th className="px-5 py-3 font-semibold">Status</th></tr></thead><tbody className="divide-y divide-slate-100">{data.leads.map((lead) => <tr key={lead.id} className="hover:bg-slate-50"><td className="px-5 py-4"><Link className="font-semibold text-slate-900 hover:text-sky-700" href={`/leads/${lead.id}`}>{lead.caller_name || "Unknown caller"}</Link><p className="mt-1 text-xs text-slate-500">{lead.caller_phone || "No number"}</p></td><td className="px-5 py-4 text-slate-600">{lead.issue_description || lead.service_type || "—"}</td><td className="px-5 py-4 capitalize text-slate-600">{lead.urgency}</td><td className="px-5 py-4 text-slate-600">{new Date(lead.created_at).toLocaleDateString()}</td><td className="px-5 py-4"><StatusBadge status={lead.status} /></td></tr>)}</tbody></table></div></AppShell>; }
